@@ -30,6 +30,12 @@ public class StatServiceImpl implements StatService {
             throw new ValidationException("Дата начала позже даты окончания");
         }
 
-        return List.of();
+        List<String> filteredUris = uris == null || uris.isEmpty() ? null : uris;
+
+        if (unique) {
+            return statRepository.findUniqueStats(start, end, filteredUris);
+        }
+
+        return statRepository.findStats(start, end, filteredUris);
     }
 }
