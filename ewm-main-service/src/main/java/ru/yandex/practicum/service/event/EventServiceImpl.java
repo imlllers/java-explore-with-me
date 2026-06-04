@@ -132,6 +132,7 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid,
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                Boolean onlyAvailable, String sort, int from, int size) {
+        validateDateRange(rangeStart, rangeEnd);
         LocalDateTime start = rangeStart != null ? rangeStart : LocalDateTime.now();
         List<Long> categoryFilter = toFilter(categories);
         String textPattern = toTextPattern(text);
@@ -320,6 +321,12 @@ public class EventServiceImpl implements EventService {
             result.add(EventState.valueOf(state.toUpperCase()));
         }
         return result;
+    }
+
+    private void validateDateRange(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+            throw new ValidationException("Некорректный диапазон дат");
+        }
     }
 
     private void checkEventDate(LocalDateTime eventDate) {
