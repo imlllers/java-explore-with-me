@@ -49,6 +49,9 @@ public class EventStatService {
 
     private Map<Long, Long> loadConfirmed(List<Long> eventIds) {
         Map<Long, Long> result = new HashMap<>();
+        if (eventIds.isEmpty()) {
+            return result;
+        }
         List<Object[]> rows = requestRepository.countConfirmedByEventIds(eventIds, RequestStatus.CONFIRMED);
         for (Object[] row : rows) {
             result.put((Long) row[0], (Long) row[1]);

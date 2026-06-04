@@ -45,8 +45,12 @@ public class StatsClient {
                 .build()
                 .toUriString();
 
-        return restTemplate.exchange(uri, HttpMethod.GET, null,
-                new ParameterizedTypeReference<>() {
-                });
+        try {
+            return restTemplate.exchange(uri, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<>() {
+                    });
+        } catch (RestClientException exception) {
+            return ResponseEntity.ok(List.of());
+        }
     }
 }

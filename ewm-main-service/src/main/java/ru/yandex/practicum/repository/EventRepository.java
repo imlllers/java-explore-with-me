@@ -1,6 +1,5 @@
 package ru.yandex.practicum.repository;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,58 +20,49 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     boolean existsByCategory_Id(Long categoryId);
 
     @EntityGraph(attributePaths = {"category", "initiator"})
-    Page<Event> findByInitiator_Id(Long initiatorId, Pageable pageable);
+    List<Event> findByInitiator_Id(Long initiatorId, Pageable pageable);
 
     @EntityGraph(attributePaths = {"category", "initiator", "location"})
-    @Query(value = """
+    @Query("""
             SELECT e FROM Event e
-            WHERE (:users IS NULL OR e.initiator.id IN :users)
-            AND (:states IS NULL OR e.state IN :states)
-            AND (:categories IS NULL OR e.category.id IN :categories)
-            AND (:rangeStart IS NULL OR e.eventDate >= :rangeStart)
-            AND (:rangeEnd IS NULL OR e.eventDate <= :rangeEnd)
-            """,
-            countQuery = """
-            SELECT count(e) FROM Event e
-            WHERE (:users IS NULL OR e.initiator.id IN :users)
-            AND (:states IS NULL OR e.state IN :states)
-            AND (:categories IS NULL OR e.category.id IN :categories)
-            AND (:rangeStart IS NULL OR e.eventDate >= :rangeStart)
-            AND (:rangeEnd IS NULL OR e.eventDate <= :rangeEnd)
+            WHERE (:ignoreUsers = true OR e.initiator.id IN :users)
+            AND (:ignoreStates = true OR e.state IN :states)
+            AND (:ignoreCategories = true OR e.category.id IN :categories)
+            AND (:ignoreRangeStart = true OR e.eventDate >= :rangeStart)
+            AND (:ignoreRangeEnd = true OR e.eventDate <= :rangeEnd)
             """)
-    Page<Event> findAdminEvents(@Param("users") List<Long> users,
+    List<Event> findAdminEvents(@Param("ignoreUsers") boolean ignoreUsers,
+                                @Param("users") List<Long> users,
+                                @Param("ignoreStates") boolean ignoreStates,
                                 @Param("states") List<EventState> states,
+                                @Param("ignoreCategories") boolean ignoreCategories,
                                 @Param("categories") List<Long> categories,
+                                @Param("ignoreRangeStart") boolean ignoreRangeStart,
                                 @Param("rangeStart") LocalDateTime rangeStart,
+                                @Param("ignoreRangeEnd") boolean ignoreRangeEnd,
                                 @Param("rangeEnd") LocalDateTime rangeEnd,
                                 Pageable pageable);
 
     @EntityGraph(attributePaths = {"category", "initiator"})
-    @Query(value = """
+    @Query("""
             SELECT e FROM Event e
             WHERE e.state = :state
-            AND (:text IS NULL OR lower(e.annotation) LIKE lower(concat('%', :text, '%'))
-                 OR lower(e.description) LIKE lower(concat('%', :text, '%')))
-            AND (:categories IS NULL OR e.category.id IN :categories)
-            AND (:paid IS NULL OR e.paid = :paid)
+            AND (:ignoreText = true OR lower(e.annotation) LIKE :textPattern
+                 OR lower(e.description) LIKE :textPattern)
+            AND (:ignoreCategories = true OR e.category.id IN :categories)
+            AND (:ignorePaid = true OR e.paid = :paid)
             AND e.eventDate >= :rangeStart
-            AND (:rangeEnd IS NULL OR e.eventDate <= :rangeEnd)
-            """,
-            countQuery = """
-            SELECT count(e) FROM Event e
-            WHERE e.state = :state
-            AND (:text IS NULL OR lower(e.annotation) LIKE lower(concat('%', :text, '%'))
-                 OR lower(e.description) LIKE lower(concat('%', :text, '%')))
-            AND (:categories IS NULL OR e.category.id IN :categories)
-            AND (:paid IS NULL OR e.paid = :paid)
-            AND e.eventDate >= :rangeStart
-            AND (:rangeEnd IS NULL OR e.eventDate <= :rangeEnd)
+            AND (:ignoreRangeEnd = true OR e.eventDate <= :rangeEnd)
             """)
-    Page<Event> findPublicEvents(@Param("state") EventState state,
-                                 @Param("text") String text,
+    List<Event> findPublicEvents(@Param("state") EventState state,
+                                 @Param("ignoreText") boolean ignoreText,
+                                 @Param("textPattern") String textPattern,
+                                 @Param("ignoreCategories") boolean ignoreCategories,
                                  @Param("categories") List<Long> categories,
+                                 @Param("ignorePaid") boolean ignorePaid,
                                  @Param("paid") Boolean paid,
                                  @Param("rangeStart") LocalDateTime rangeStart,
+                                 @Param("ignoreRangeEnd") boolean ignoreRangeEnd,
                                  @Param("rangeEnd") LocalDateTime rangeEnd,
                                  Pageable pageable);
 
@@ -80,18 +70,22 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("""
             SELECT e FROM Event e
             WHERE e.state = :state
-            AND (:text IS NULL OR lower(e.annotation) LIKE lower(concat('%', :text, '%'))
-                 OR lower(e.description) LIKE lower(concat('%', :text, '%')))
-            AND (:categories IS NULL OR e.category.id IN :categories)
-            AND (:paid IS NULL OR e.paid = :paid)
+            AND (:ignoreText = true OR lower(e.annotation) LIKE :textPattern
+                 OR lower(e.description) LIKE :textPattern)
+            AND (:ignoreCategories = true OR e.category.id IN :categories)
+            AND (:ignorePaid = true OR e.paid = :paid)
             AND e.eventDate >= :rangeStart
-            AND (:rangeEnd IS NULL OR e.eventDate <= :rangeEnd)
+            AND (:ignoreRangeEnd = true OR e.eventDate <= :rangeEnd)
             ORDER BY e.eventDate ASC
             """)
     List<Event> findAllPublicEvents(@Param("state") EventState state,
-                                    @Param("text") String text,
+                                    @Param("ignoreText") boolean ignoreText,
+                                    @Param("textPattern") String textPattern,
+                                    @Param("ignoreCategories") boolean ignoreCategories,
                                     @Param("categories") List<Long> categories,
+                                    @Param("ignorePaid") boolean ignorePaid,
                                     @Param("paid") Boolean paid,
                                     @Param("rangeStart") LocalDateTime rangeStart,
+                                    @Param("ignoreRangeEnd") boolean ignoreRangeEnd,
                                     @Param("rangeEnd") LocalDateTime rangeEnd);
 }

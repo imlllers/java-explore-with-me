@@ -2,6 +2,7 @@ package ru.yandex.practicum.controller.publicapi;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.StatDto;
 import ru.yandex.practicum.client.StatsClient;
@@ -23,8 +24,10 @@ public class PublicEventController {
     public List<EventShortDto> getEvents(@RequestParam(required = false) String text,
                                          @RequestParam(required = false) List<Long> categories,
                                          @RequestParam(required = false) Boolean paid,
-                                         @RequestParam(required = false) LocalDateTime rangeStart,
-                                         @RequestParam(required = false) LocalDateTime rangeEnd,
+                                         @RequestParam(required = false)
+                                         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+                                         @RequestParam(required = false)
+                                         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                          @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                          @RequestParam(required = false) String sort,
                                          @RequestParam(defaultValue = "0") int from,

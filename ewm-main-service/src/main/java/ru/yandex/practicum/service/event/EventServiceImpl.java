@@ -1,7 +1,6 @@
 package ru.yandex.practicum.service.event;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -45,13 +44,20 @@ public class EventServiceImpl implements EventService {
         List<Long> userFilter = toFilter(users);
         List<Long> categoryFilter = toFilter(categories);
         List<EventState> stateFilter = toStateFilter(states);
-        validateDateRange(rangeStart, rangeEnd);
+        boolean ignoreUsers = userFilter == null;
+        boolean ignoreStates = stateFilter == null;
+        boolean ignoreCategories = categoryFilter == null;
+        boolean ignoreRangeStart = rangeStart == null;
+        boolean ignoreRangeEnd = rangeEnd == null;
 
         Pageable pageable = new OffsetBasedPageRequest(from, size, Sort.by("id"));
-        Page<Event> page = eventRepository.findAdminEvents(userFilter, stateFilter, categoryFilter,
-                rangeStart, rangeEnd, pageable);
-
-        List<Event> events = page.getContent();
+        List<Event> events = eventRepository.findAdminEvents(
+                ignoreUsers, userFilter != null ? userFilter : List.of(),
+                ignoreStates, stateFilter != null ? stateFilter : List.of(),
+                ignoreCategories, categoryFilter != null ? categoryFilter : List.of(),
+                ignoreRangeStart, rangeStart != null ? rangeStart : LocalDateTime.now(),
+                ignoreRangeEnd, rangeEnd != null ? rangeEnd : LocalDateTime.now(),
+                pageable);
         eventStatService.fillStats(events);
         return EventMapper.toEventFullDtos(events);
     }
@@ -76,7 +82,7 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getUserEvents(Long userId, int from, int size) {
         verifyUser(userId);
         Pageable pageable = new OffsetBasedPageRequest(from, size, Sort.by("id"));
-        List<Event> events = eventRepository.findByInitiator_Id(userId, pageable).getContent();
+        List<Event> events = eventRepository.findByInitiator_Id(userId, pageable);
         eventStatService.fillStats(events);
         return EventMapper.toEventShortDtos(events);
     }
@@ -127,22 +133,35 @@ public class EventServiceImpl implements EventService {
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                Boolean onlyAvailable, String sort, int from, int size) {
         LocalDateTime start = rangeStart != null ? rangeStart : LocalDateTime.now();
-        validateDateRange(rangeStart, rangeEnd);
-        validateSort(sort);
         List<Long> categoryFilter = toFilter(categories);
-        String textFilter = (text == null || text.isBlank()) ? null : text;
+        String textPattern = toTextPattern(text);
+        boolean ignoreText = textPattern == null;
+        boolean ignoreCategories = categoryFilter == null;
+        boolean ignorePaid = paid == null;
+        boolean ignoreRangeEnd = rangeEnd == null;
         boolean sortByViews = "VIEWS".equalsIgnoreCase(sort);
 
         if (!Boolean.TRUE.equals(onlyAvailable) && !sortByViews) {
             Pageable pageable = new OffsetBasedPageRequest(from, size, Sort.by("eventDate"));
-            List<Event> events = eventRepository.findPublicEvents(EventState.PUBLISHED, textFilter, categoryFilter,
-                    paid, start, rangeEnd, pageable).getContent();
+            List<Event> events = eventRepository.findPublicEvents(
+                    EventState.PUBLISHED,
+                    ignoreText, textPattern != null ? textPattern : "",
+                    ignoreCategories, categoryFilter != null ? categoryFilter : List.of(),
+                    ignorePaid, paid != null ? paid : false,
+                    start,
+                    ignoreRangeEnd, rangeEnd != null ? rangeEnd : LocalDateTime.now(),
+                    pageable);
             eventStatService.fillStats(events);
             return EventMapper.toEventShortDtos(events);
         }
 
-        List<Event> events = eventRepository.findAllPublicEvents(EventState.PUBLISHED, textFilter, categoryFilter,
-                paid, start, rangeEnd);
+        List<Event> events = eventRepository.findAllPublicEvents(
+                EventState.PUBLISHED,
+                ignoreText, textPattern != null ? textPattern : "",
+                ignoreCategories, categoryFilter != null ? categoryFilter : List.of(),
+                ignorePaid, paid != null ? paid : false,
+                start,
+                ignoreRangeEnd, rangeEnd != null ? rangeEnd : LocalDateTime.now());
         eventStatService.fillStats(events);
 
         if (Boolean.TRUE.equals(onlyAvailable)) {
@@ -285,6 +304,13 @@ public class EventServiceImpl implements EventService {
         return ids;
     }
 
+    private String toTextPattern(String text) {
+        if (text == null || text.isBlank()) {
+            return null;
+        }
+        return "%" + text.toLowerCase() + "%";
+    }
+
     private List<EventState> toStateFilter(List<String> states) {
         if (states == null || states.isEmpty()) {
             return null;
@@ -294,21 +320,6 @@ public class EventServiceImpl implements EventService {
             result.add(EventState.valueOf(state.toUpperCase()));
         }
         return result;
-    }
-
-    private void validateDateRange(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
-        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
-            throw new ValidationException("Некорректный диапазон дат");
-        }
-    }
-
-    private void validateSort(String sort) {
-        if (sort == null || sort.isBlank()) {
-            return;
-        }
-        if (!"VIEWS".equalsIgnoreCase(sort) && !"EVENT_DATE".equalsIgnoreCase(sort)) {
-            throw new ValidationException("Некорректный параметр сортировки");
-        }
     }
 
     private void checkEventDate(LocalDateTime eventDate) {
