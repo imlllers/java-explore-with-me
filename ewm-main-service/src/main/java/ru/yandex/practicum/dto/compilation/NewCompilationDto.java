@@ -15,6 +15,7 @@ import java.util.Set;
 @Builder
 public class NewCompilationDto {
     private Set<Long> events;
+    @Builder.Default
     private Boolean pinned = false;
 
     @NotBlank(message = "Название подборки не должно быть пустым")

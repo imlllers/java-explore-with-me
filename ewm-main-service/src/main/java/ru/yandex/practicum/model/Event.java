@@ -62,8 +62,10 @@ public class Event {
     private Location location;
 
     @Transient
+    @Builder.Default
     private Long views = 0L;
 
     @Transient
+    @Builder.Default
     private Long confirmedRequests = 0L;
 }

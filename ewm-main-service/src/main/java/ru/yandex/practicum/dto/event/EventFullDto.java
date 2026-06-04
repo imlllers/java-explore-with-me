@@ -1,16 +1,14 @@
 package ru.yandex.practicum.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.yandex.practicum.dto.LocationDto;
 import ru.yandex.practicum.dto.category.CategoryDto;
 import ru.yandex.practicum.dto.user.UserShortDto;
-import ru.yandex.practicum.dto.user.UserShortDto;
-import ru.yandex.practicum.dto.LocationDto;
 
 import java.time.LocalDateTime;
 

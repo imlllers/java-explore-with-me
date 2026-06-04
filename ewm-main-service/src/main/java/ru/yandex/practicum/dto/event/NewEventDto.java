@@ -35,8 +35,11 @@ public class NewEventDto {
     @NotNull(message = "Местоположение должно быть указано")
     private LocationDto location;
 
+    @Builder.Default
     private Boolean paid = false;
+    @Builder.Default
     private Integer participantLimit = 0;
+    @Builder.Default
     private Boolean requestModeration = true;
 
     @NotBlank(message = "Заголовок не должен быть пустым")

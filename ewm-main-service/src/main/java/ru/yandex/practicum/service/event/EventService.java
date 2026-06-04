@@ -11,14 +11,21 @@ import java.util.List;
 
 public interface EventService {
     List<EventFullDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories,
-                                     LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size);
+                                      LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size);
+
     EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest request);
+
     List<EventShortDto> getUserEvents(Long userId, int from, int size);
+
     EventFullDto addEvent(Long userId, NewEventDto dto);
+
     EventFullDto getUserEvent(Long userId, Long eventId);
+
     EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest request);
+
     List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid,
-                                       LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                       Boolean onlyAvailable, String sort, int from, int size);
+                                        LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                        Boolean onlyAvailable, String sort, int from, int size);
+
     EventFullDto getPublicEventById(Long eventId);
 }
