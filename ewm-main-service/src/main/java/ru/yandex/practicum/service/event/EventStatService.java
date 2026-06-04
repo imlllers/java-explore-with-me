@@ -68,7 +68,7 @@ public class EventStatService {
         }
 
         try {
-            var response = statsClient.getStats(STATS_START, LocalDateTime.now(), uris, false);
+            var response = statsClient.getStats(STATS_START, LocalDateTime.now(), uris, true);
             if (response.getBody() == null) {
                 return views;
             }

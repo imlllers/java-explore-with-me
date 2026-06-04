@@ -13,6 +13,7 @@ import ru.yandex.practicum.dto.event.UpdateEventAdminRequest;
 import ru.yandex.practicum.dto.event.UpdateEventUserRequest;
 import ru.yandex.practicum.exception.ConflictException;
 import ru.yandex.practicum.exception.NotFoundException;
+import ru.yandex.practicum.exception.ValidationException;
 import ru.yandex.practicum.model.Category;
 import ru.yandex.practicum.model.Event;
 import ru.yandex.practicum.model.User;
@@ -44,6 +45,7 @@ public class EventServiceImpl implements EventService {
         List<Long> userFilter = toFilter(users);
         List<Long> categoryFilter = toFilter(categories);
         List<EventState> stateFilter = toStateFilter(states);
+        validateDateRange(rangeStart, rangeEnd);
 
         Pageable pageable = new OffsetBasedPageRequest(from, size, Sort.by("id"));
         Page<Event> page = eventRepository.findAdminEvents(userFilter, stateFilter, categoryFilter,
@@ -59,6 +61,9 @@ public class EventServiceImpl implements EventService {
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest request) {
         Event event = getEvent(eventId);
         updateEventFields(event, request);
+        if (request.getEventDate() != null) {
+            checkEventDate(request.getEventDate());
+        }
         if (request.getStateAction() != null) {
             updateAdminState(event, request.getStateAction());
         }
@@ -122,19 +127,22 @@ public class EventServiceImpl implements EventService {
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                Boolean onlyAvailable, String sort, int from, int size) {
         LocalDateTime start = rangeStart != null ? rangeStart : LocalDateTime.now();
+        validateDateRange(rangeStart, rangeEnd);
+        validateSort(sort);
         List<Long> categoryFilter = toFilter(categories);
         String textFilter = (text == null || text.isBlank()) ? null : text;
         boolean sortByViews = "VIEWS".equalsIgnoreCase(sort);
 
         if (!Boolean.TRUE.equals(onlyAvailable) && !sortByViews) {
             Pageable pageable = new OffsetBasedPageRequest(from, size, Sort.by("eventDate"));
-            List<Event> events = eventRepository.findPublicEvents(textFilter, categoryFilter, paid, start, rangeEnd, pageable)
-                    .getContent();
+            List<Event> events = eventRepository.findPublicEvents(EventState.PUBLISHED, textFilter, categoryFilter,
+                    paid, start, rangeEnd, pageable).getContent();
             eventStatService.fillStats(events);
             return EventMapper.toEventShortDtos(events);
         }
 
-        List<Event> events = eventRepository.findAllPublicEvents(textFilter, categoryFilter, paid, start, rangeEnd);
+        List<Event> events = eventRepository.findAllPublicEvents(EventState.PUBLISHED, textFilter, categoryFilter,
+                paid, start, rangeEnd);
         eventStatService.fillStats(events);
 
         if (Boolean.TRUE.equals(onlyAvailable)) {
@@ -288,9 +296,25 @@ public class EventServiceImpl implements EventService {
         return result;
     }
 
+    private void validateDateRange(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+            throw new ValidationException("Некорректный диапазон дат");
+        }
+    }
+
+    private void validateSort(String sort) {
+        if (sort == null || sort.isBlank()) {
+            return;
+        }
+        if (!"VIEWS".equalsIgnoreCase(sort) && !"EVENT_DATE".equalsIgnoreCase(sort)) {
+            throw new ValidationException("Некорректный параметр сортировки");
+        }
+    }
+
     private void checkEventDate(LocalDateTime eventDate) {
         if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConflictException("Дата события должна быть минимум через два часа от текущего момента");
+            throw new ValidationException("Поле: eventDate. Ошибка: должно содержать дату, которая еще не наступила. Значение: "
+                    + eventDate);
         }
     }
 

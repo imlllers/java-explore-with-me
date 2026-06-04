@@ -2,6 +2,7 @@ package ru.yandex.practicum.controller.privateapi;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateResult;
@@ -35,6 +36,7 @@ public class PrivateRequestController {
     }
 
     @PostMapping("/requests")
+    @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto addRequest(@PathVariable Long userId,
                                               @RequestParam Long eventId) {
         return requestService.addParticipationRequest(userId, eventId);

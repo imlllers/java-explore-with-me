@@ -1,6 +1,7 @@
 package ru.yandex.practicum.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -37,8 +38,11 @@ public class NewEventDto {
 
     @Builder.Default
     private Boolean paid = false;
+
+    @Min(value = 0, message = "Лимит участников не может быть отрицательным")
     @Builder.Default
     private Integer participantLimit = 0;
+
     @Builder.Default
     private Boolean requestModeration = true;
 
