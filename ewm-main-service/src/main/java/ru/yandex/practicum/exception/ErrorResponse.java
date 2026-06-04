@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.yandex.practicum.util.DateTimePattern;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,6 @@ public class ErrorResponse {
     private String message;
     private List<String> errors;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DateTimePattern.PATTERN)
     private LocalDateTime timestamp;
 }

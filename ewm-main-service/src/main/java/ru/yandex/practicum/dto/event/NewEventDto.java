@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.yandex.practicum.dto.LocationDto;
+import ru.yandex.practicum.util.DateTimePattern;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +31,7 @@ public class NewEventDto {
     private String description;
 
     @NotNull(message = "Дата события должна быть указана")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DateTimePattern.PATTERN)
     private LocalDateTime eventDate;
 
     @NotNull(message = "Местоположение должно быть указано")

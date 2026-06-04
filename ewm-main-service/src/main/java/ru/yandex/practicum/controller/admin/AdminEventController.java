@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.UpdateEventAdminRequest;
 import ru.yandex.practicum.service.event.EventService;
+import ru.yandex.practicum.util.DateTimePattern;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,9 +23,9 @@ public class AdminEventController {
                                         @RequestParam(required = false) List<String> states,
                                         @RequestParam(required = false) List<Long> categories,
                                         @RequestParam(required = false)
-                                        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+                                        @DateTimeFormat(pattern = DateTimePattern.PATTERN) LocalDateTime rangeStart,
                                         @RequestParam(required = false)
-                                        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+                                        @DateTimeFormat(pattern = DateTimePattern.PATTERN) LocalDateTime rangeEnd,
                                         @RequestParam(defaultValue = "0") int from,
                                         @RequestParam(defaultValue = "10") int size) {
         return eventService.getEventsAdmin(users, states, categories, rangeStart, rangeEnd, from, size);

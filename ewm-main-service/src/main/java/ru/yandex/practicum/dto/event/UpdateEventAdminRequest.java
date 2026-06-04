@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.yandex.practicum.dto.LocationDto;
+import ru.yandex.practicum.util.DateTimePattern;
 
 import java.time.LocalDateTime;
 
@@ -24,7 +25,7 @@ public class UpdateEventAdminRequest {
     @Size(min = 20, max = 7000)
     private String description;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DateTimePattern.PATTERN)
     private LocalDateTime eventDate;
 
     private LocationDto location;

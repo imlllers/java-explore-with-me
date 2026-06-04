@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import ru.yandex.practicum.dto.LocationDto;
 import ru.yandex.practicum.dto.category.CategoryDto;
 import ru.yandex.practicum.dto.user.UserShortDto;
+import ru.yandex.practicum.util.DateTimePattern;
 
 import java.time.LocalDateTime;
 
@@ -23,10 +24,10 @@ public class EventFullDto {
     private CategoryDto category;
     private Long confirmedRequests;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DateTimePattern.PATTERN)
     private LocalDateTime createdOn;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DateTimePattern.PATTERN)
     @NotNull
     private LocalDateTime eventDate;
 
@@ -37,7 +38,7 @@ public class EventFullDto {
     private Boolean requestModeration;
     private String state;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DateTimePattern.PATTERN)
     private LocalDateTime publishedOn;
 
     private String title;

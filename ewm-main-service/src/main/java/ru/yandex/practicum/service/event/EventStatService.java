@@ -2,12 +2,13 @@ package ru.yandex.practicum.service.event;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.client.StatsClient;
 import ru.practicum.dto.ViewStatDto;
-import ru.yandex.practicum.client.StatsClient;
 import ru.yandex.practicum.model.Event;
 import ru.yandex.practicum.model.enums.RequestStatus;
 import ru.yandex.practicum.repository.RequestRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,8 +18,6 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class EventStatService {
-    private static final LocalDateTime STATS_START = LocalDateTime.of(1970, 1, 1, 0, 0);
-
     private final RequestRepository requestRepository;
     private final StatsClient statsClient;
 
@@ -39,11 +38,14 @@ public class EventStatService {
         }
 
         Map<Long, Long> confirmed = loadConfirmed(ids);
-        Map<Long, Long> views = loadViews(ids);
+        LocalDateTime start = resolveStatsStart(events);
+        LocalDateTime end = LocalDateTime.now();
+        Map<Long, Long> views = loadViews(ids, start, end);
 
         for (Event event : events) {
-            event.setConfirmedRequests(confirmed.getOrDefault(event.getId(), 0L));
-            event.setViews(views.getOrDefault(event.getId(), 0L));
+            Long eventId = event.getId();
+            event.setConfirmedRequests(confirmed.getOrDefault(eventId, 0L));
+            event.setViews(views.getOrDefault(eventId, 0L));
         }
     }
 
@@ -59,7 +61,7 @@ public class EventStatService {
         return result;
     }
 
-    private Map<Long, Long> loadViews(List<Long> eventIds) {
+    private Map<Long, Long> loadViews(List<Long> eventIds, LocalDateTime start, LocalDateTime end) {
         Map<Long, Long> views = new HashMap<>();
         if (eventIds.isEmpty()) {
             return views;
@@ -71,7 +73,7 @@ public class EventStatService {
         }
 
         try {
-            var response = statsClient.getStats(STATS_START, LocalDateTime.now(), uris, true);
+            var response = statsClient.getStats(start, end, uris, true);
             if (response.getBody() == null) {
                 return views;
             }
@@ -84,5 +86,26 @@ public class EventStatService {
             return views;
         }
         return views;
+    }
+
+    private LocalDateTime resolveStatsStart(List<Event> events) {
+        LocalDateTime earliest = null;
+        for (Event event : events) {
+            LocalDateTime publishedOn = event.getPublishedOn();
+            if (publishedOn == null) {
+                continue;
+            }
+            if (earliest == null || publishedOn.isBefore(earliest)) {
+                earliest = publishedOn;
+            }
+        }
+        if (earliest == null) {
+            return startOfCurrentYear();
+        }
+        return earliest;
+    }
+
+    private static LocalDateTime startOfCurrentYear() {
+        return LocalDateTime.of(LocalDate.now().getYear(), 1, 1, 0, 0);
     }
 }

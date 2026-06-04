@@ -1,5 +1,6 @@
 package ru.yandex.practicum.model.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.dto.LocationDto;
 import ru.yandex.practicum.dto.category.CategoryDto;
 import ru.yandex.practicum.dto.event.EventFullDto;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@UtilityClass
 public class EventMapper {
 
     public static EventShortDto toEventShortDto(Event event) {

@@ -1,14 +1,16 @@
-package ru.yandex.practicum.controller.publicapi;
+package ru.yandex.practicum.controller.pub;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.client.StatsClient;
 import ru.practicum.dto.StatDto;
-import ru.yandex.practicum.client.StatsClient;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.EventShortDto;
 import ru.yandex.practicum.service.event.EventService;
+import ru.yandex.practicum.util.DateTimePattern;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,14 +22,17 @@ public class PublicEventController {
     private final EventService eventService;
     private final StatsClient statsClient;
 
+    @Value("${spring.application.name}")
+    private String appName;
+
     @GetMapping
     public List<EventShortDto> getEvents(@RequestParam(required = false) String text,
                                          @RequestParam(required = false) List<Long> categories,
                                          @RequestParam(required = false) Boolean paid,
                                          @RequestParam(required = false)
-                                         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+                                         @DateTimeFormat(pattern = DateTimePattern.PATTERN) LocalDateTime rangeStart,
                                          @RequestParam(required = false)
-                                         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+                                         @DateTimeFormat(pattern = DateTimePattern.PATTERN) LocalDateTime rangeEnd,
                                          @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                          @RequestParam(required = false) String sort,
                                          @RequestParam(defaultValue = "0") int from,
@@ -45,7 +50,7 @@ public class PublicEventController {
 
     private void saveHit(HttpServletRequest request) {
         StatDto dto = StatDto.builder()
-                .app("ewm-main-service")
+                .app(appName)
                 .uri(request.getRequestURI())
                 .ip(request.getRemoteAddr())
                 .timestamp(LocalDateTime.now())

@@ -1,8 +1,10 @@
 package ru.yandex.practicum.model.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.dto.request.ParticipationRequestDto;
 import ru.yandex.practicum.model.ParticipationRequest;
 
+@UtilityClass
 public class RequestMapper {
     public static ParticipationRequestDto toDto(ParticipationRequest request) {
         return ParticipationRequestDto.builder()

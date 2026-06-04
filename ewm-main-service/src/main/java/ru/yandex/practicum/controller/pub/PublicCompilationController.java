@@ -1,4 +1,4 @@
-package ru.yandex.practicum.controller.publicapi;
+package ru.yandex.practicum.controller.pub;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
