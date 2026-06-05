@@ -1,0 +1,53 @@
+package ru.yandex.practicum.dto.event;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.yandex.practicum.dto.LocationDto;
+import ru.yandex.practicum.util.DateTimePattern;
+
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class NewEventDto {
+    @NotBlank(message = "Аннотация не должна быть пустой")
+    @Size(min = 20, max = 2000, message = "Длина аннотации должна быть от {min} до {max} символов")
+    private String annotation;
+
+    @NotNull(message = "Категория должна быть указана")
+    private Long category;
+
+    @NotBlank(message = "Описание не должно быть пустым")
+    @Size(min = 20, max = 7000, message = "Длина описания должна быть от {min} до {max} символов")
+    private String description;
+
+    @NotNull(message = "Дата события должна быть указана")
+    @JsonFormat(pattern = DateTimePattern.PATTERN)
+    private LocalDateTime eventDate;
+
+    @NotNull(message = "Местоположение должно быть указано")
+    private LocationDto location;
+
+    @Builder.Default
+    private Boolean paid = false;
+
+    @Min(value = 0, message = "Лимит участников не может быть отрицательным")
+    @Builder.Default
+    private Integer participantLimit = 0;
+
+    @Builder.Default
+    private Boolean requestModeration = true;
+
+    @NotBlank(message = "Заголовок не должен быть пустым")
+    @Size(min = 3, max = 120, message = "Длина заголовка должна быть от {min} до {max} символов")
+    private String title;
+}

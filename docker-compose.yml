@@ -9,6 +9,16 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
 
+  main-db:
+    image: postgres:16.1
+    container_name: main-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: explorewithme
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
   stats-server:
     build: ./ewm-stats-service/stats-server
     image: stats-server
@@ -29,9 +39,9 @@ services:
       - "8080:8080"
     depends_on:
       - stats-server
-      - stats-db
+      - main-db
     environment:
       STATS_SERVER_URL: http://stats-server:9090
-      SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:5432/explorewithme
+      SPRING_DATASOURCE_URL: jdbc:postgresql://main-db:5432/explorewithme
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
