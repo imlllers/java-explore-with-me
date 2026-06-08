@@ -21,6 +21,7 @@ import ru.yandex.practicum.model.mapper.EventMapper;
 import ru.yandex.practicum.repository.CategoryRepository;
 import ru.yandex.practicum.repository.EventRepository;
 import ru.yandex.practicum.repository.UserRepository;
+import ru.yandex.practicum.service.rating.EventRatingService;
 import ru.yandex.practicum.util.OffsetBasedPageRequest;
 import ru.yandex.practicum.util.PageUtils;
 
@@ -37,6 +38,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final EventStatService eventStatService;
+    private final EventRatingService eventRatingService;
 
     @Override
     public List<EventFullDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories,
@@ -183,6 +185,7 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Событие с id=" + eventId + " не найдено");
         }
         eventStatService.fillStats(event);
+        eventRatingService.fillRatings(event);
         return EventMapper.toEventFullDto(event);
     }
 

@@ -12,6 +12,8 @@ import java.util.List;
 public interface RequestRepository extends JpaRepository<ParticipationRequest, Long> {
     boolean existsByRequester_IdAndEvent_Id(Long requesterId, Long eventId);
 
+    boolean existsByRequester_IdAndEvent_IdAndStatus(Long requesterId, Long eventId, RequestStatus status);
+
     long countByEvent_IdAndStatus(Long eventId, RequestStatus status);
 
     List<ParticipationRequest> findByEvent_Id(Long eventId);

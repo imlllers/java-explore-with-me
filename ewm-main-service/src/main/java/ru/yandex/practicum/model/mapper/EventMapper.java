@@ -60,6 +60,7 @@ public class EventMapper {
                 .publishedOn(event.getPublishedOn())
                 .title(event.getTitle())
                 .views(event.getViews())
+                .rating(event.getRating())
                 .build();
     }
 
